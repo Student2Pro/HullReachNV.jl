@@ -1,0 +1,13 @@
+name = "HullReachNV"
+uuid = "4270d250-6731-11ea-1386-1dbd79c4af9a"
+authors = ["Cloud Johnson"]
+version = "0.1.0"
+
+[compat]
+julia = "1.2"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
