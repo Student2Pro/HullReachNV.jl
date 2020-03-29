@@ -3,7 +3,7 @@ using Test
 using LazySets
 
 @testset "HullReachNV.jl" begin
-    solver = MaxSens(0.1, false)
+    solver = BackwardReach()
 
     acas_nnet = read_nnet("nnet/ACASXU_run2a_4_5_batch_2000.nnet")
 
@@ -13,11 +13,11 @@ using LazySets
     in_hyper = Hyperrectangle(center, radius)
 
     c = [0.0, 0.0, 0.0, 0.0, 0.0]
-    r = [10.0, 4.0, 3.5, 4.5, 4.5]
+    r = [20.0, 20.0, 20.0, 20.0, 20.0]
 
     out_hyper = Hyperrectangle(c, r)
 
-    problem = Problem(acas_nnet, in_hyper, out_hyper)
+    problem = Problem(acas_nnet, convert(HPolyhedron, in_hyper), convert(HPolyhedron, out_hyper))
 
     result = solve(solver, problem)
 
