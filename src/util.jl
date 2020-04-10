@@ -8,7 +8,7 @@ Keyword argument `last_layer_activation` sets the activation of the last
 layer, and defaults to `Id()`, (i.e. a linear output layer).
 """
 
-function read_nnet(fname::String; last_layer_activation = PiecewiseLinearActivation([LinearPieces(-Inf, Inf, 1.0, 0.0)])) #add IDact
+function read_nnet(fname::String; last_layer_activation = Id())
     f = open(fname)
     line = readline(f)
     while occursin("//", line) #skip comments
@@ -23,7 +23,7 @@ function read_nnet(fname::String; last_layer_activation = PiecewiseLinearActivat
         line = readline(f)
     end
     # i=1 corresponds to the input dimension, so it's ignored
-    layers = Layer[read_layer(dim, f) for dim in layer_sizes[2:end-1]] #add ReLUact
+    layers = Layer[read_layer(dim, f, GeneralAct(tanh)) for dim in layer_sizes[2:end-1]] #add ReLUact/tanh
     push!(layers, read_layer(last(layer_sizes), f, last_layer_activation))
 
     return Network(layers)
@@ -35,7 +35,7 @@ end
 Read in layer from nnet file and return a `Layer` containing its weights/biases.
 Optional argument `act` sets the activation function for the layer.
 """
-function read_layer(output_dim::Int64, f::IOStream, act = PiecewiseLinearActivation([LinearPieces(-Inf, 0.0, 0.0, 0.0), LinearPieces(0.0, Inf, 1.0, 0.0)]))
+function read_layer(output_dim::Int64, f::IOStream, act = ReLU())
 
     rowparse(splitrow) = parse.(Float64, splitrow[findall(!isempty, splitrow)])
      # first read in weights

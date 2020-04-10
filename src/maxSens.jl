@@ -32,10 +32,30 @@ end
 
 # This is the main function
 function solve(solver::MaxSens, problem::Problem)
-    inputs = partition(problem.input, solver.resolution)
-    f_n(x) = forward_network(solver, problem.network, x)
-    outputs = map(f_n, inputs)
-    return check_inclusion(outputs, problem.output)
+    result = true
+    delta = solver.resolution
+    lower, upper = low(problem.input), high(problem.input)
+    n_hypers_per_dim = max.(ceil.(Int, (upper-lower) / delta), 1)
+
+    # preallocate work arrays
+    local_lower, local_upper, CI = similar(lower), similar(lower), similar(lower)
+    for i in 1:prod(n_hypers_per_dim)
+        n = i
+        for j in firstindex(CI):lastindex(CI)
+            n, CI[j] = fldmod1(n, n_hypers_per_dim[j])
+        end
+        @. local_lower = lower + delta * (CI - 1)
+        @. local_upper = min(local_lower + delta, upper)
+        hyper = Hyperrectangle(low = local_lower, high = local_upper)
+        reach = forward_network(solver, problem.network, hyper)
+        if !issubset(reach, problem.output)
+            result = false
+        end
+    end
+    if result
+        return BasicResult(:holds)
+    end
+    return BasicResult(:violated)
 end
 
 # This function is called by forward_network
@@ -61,40 +81,4 @@ function forward_node(solver::MaxSens, node::Node, input::Hyperrectangle)
     else
         return (β, max(abs(βmax - β), abs(βmin - β)))
     end
-end
-
-function partition(input::Hyperrectangle, delta::Float64)
-    n_dim = dim(input)
-    lower, upper = low(input), high(input)
-    radius = fill(delta/2, n_dim)
-
-    hyperrectangle_list = ceil.(Int, (upper - lower)/delta)
-
-    part_list = zeros(Int64, n_dim)
-    part_list[1] = 1
-    for j in 2:n_dim
-        part_list[j] = part_list[j-1] * max(hyperrectangle_list[j-1], 1)
-    end
-
-    n_hyperrectangle = part_list[n_dim] * max(hyperrectangle_list[n_dim], 1)
-
-    hyperrectangles = Vector{Hyperrectangle}(undef, n_hyperrectangle)
-    for k in 1:n_hyperrectangle
-        n = k - 1
-        center = Vector{Float64}(undef, n_dim)
-        for i in n_dim:-1:1
-            id = div(n, part_list[i])
-            n = mod(n, part_list[i])
-            lower_cell = lower[i] + min(delta, input.radius[i]*2) * id
-            radius[i] = min(delta, upper[i] - lower_cell) * 0.5
-            center[i] = lower_cell + radius[i];
-        end
-        hyperrectangles[k] = Hyperrectangle(center[:], radius[:])
-    end
-    return hyperrectangles
-end
-
-function partition(input::HPolytope, delta::Float64)
-    @info "MaxSens overapproximates HPolytope input sets as Hyperrectangles."
-    partition(overapproximate(input), delta)
 end

@@ -28,7 +28,8 @@ end
 
 # This is the main function
 function solve(solver::SGSV, problem::Problem)
-    input = overapproximate(problem.input)
+    result = true
+    input = problem.input
     stack = Vector{Hyperrectangle}(undef, 0)
     push!(stack, input)
     while !isempty(stack)
@@ -40,16 +41,17 @@ function solve(solver::SGSV, problem::Problem)
             if get_largest_width(interval) > solver.tolerance
                 sections = bisect(interval)
                 for i in 1:2
-                    if isintersection(sections[i], problem.input)
-                        push!(stack, sections[i])
-                    end
+                    push!(stack, sections[i])
                 end
             else
-                return BasicResult(:unknown)
+                result = false
             end
         end
     end
-    return BasicResult(:holds)
+    if result
+        return BasicResult(:holds)
+    end
+    return BasicResult(:unknown)
 end
 
 function get_largest_width(input::Hyperrectangle)
@@ -75,27 +77,6 @@ function bisect(input::Hyperrectangle)
     upper[index] = input.center[index] + input.radius[index]
     upper_part = Hyperrectangle(low = lower, high = upper)
     return (lower_part, upper_part)
-end
-
-function isintersection(x::Hyperrectangle, y::HPolytope)
-    lower, upper = low(x), high(x)
-    n = length(lower)
-    Cy, dy = tosimplehrep(y)
-    Cx = zeros(Float64, 2n, n)
-    dx = zeros(Float64, 2n)
-    for i in 1:n
-        Cx[2i, i] = 1.0
-        dx[2i] = upper[i]
-        Cx[2i-1, i] = -1.0
-        dx[2i-1] = -lower[i]
-    end
-    C = vcat(Cy, Cx)
-    d = vcat(dy, dx)
-    if isempty(HPolytope(C, d))
-        return false
-    else
-        return true
-    end
 end
 
 function forward_layer(solver::SGSV, L::Layer, input::Hyperrectangle)

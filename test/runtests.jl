@@ -3,24 +3,24 @@ using Test
 using LazySets
 
 @testset "HullReachNV.jl" begin
-    solver = MaxSens(0.1, false)
+    nnet = read_nnet("nnet/test_nnet.nnet")
 
-    acas_nnet = read_nnet("nnet/ACASXU_run2a_4_5_batch_2000.nnet")
+    solver = HullReach(0.001, false)
 
-    center = [1.0, 1.0, 1.0, 1.0, 1.0]
-    radius = [1.0, 1.0, 1.0, 1.0, 1.0]
+    center = [0.5, 0.5]
+    radius = [0.5, 0.5]
 
     in_hyper = Hyperrectangle(center, radius)
 
-    c = [0.0, 0.0, 0.0, 0.0, 0.0]
-    r = [10.0, 4.0, 3.5, 4.5, 4.5]
+    lower = [-3.75, -1.5]
+    upper = [-1.5, 2.0]
 
-    out_hyper = Hyperrectangle(c, r)
+    out_hyper = Hyperrectangle(low=lower, high=upper)
 
-    problem = Problem(acas_nnet, in_hyper, out_hyper)
+    problem = Problem(nnet, in_hyper, out_hyper)
 
     result = solve(solver, problem)
 
-    @test result.status == :holds
+    @test result.status == :violated
 
 end

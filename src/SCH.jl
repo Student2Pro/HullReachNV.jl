@@ -23,7 +23,8 @@ end
 
 # This is the main function
 function solve(solver::SCH, problem::Problem)
-    input = overapproximate(problem.input)
+    result = true
+    input = problem.input
     stack = Vector{Hyperrectangle}(undef, 0)
     push!(stack, input)
     while !isempty(stack)
@@ -40,52 +41,26 @@ function solve(solver::SCH, problem::Problem)
                     end
                 end
             else
-                return BasicResult(:unknown)
+                result = false
             end
         end
     end
-    return BasicResult(:holds)
+    if result
+        return BasicResult(:holds)
+    end
+    return BasicResult(:unknown)
 end
 
 #to determine whether x has intersection with any border of y
-function isborder(x::Hyperrectangle, y::HPolytope)
-    lower, upper = low(x), high(x)
-    n = length(lower)
-    Cy, dy = tosimplehrep(y)
-    Cx = zeros(Float64, 2n, n)
-    dx = zeros(Float64, 2n)
-    for i in 1:n
-        Cx[2i, i] = 1.0
-        dx[2i] = upper[i]
-        Cx[2i-1, i] = -1.0
-        dx[2i-1] = -lower[i]
-    end
-    C = vcat(Cy, Cx)
-    d = vcat(dy, dx)
-    if isempty(HPolytope(C, d))
-        return false
-    else
-        l = length(dy)
-        point1 = zeros(Float64, n)
-        point2 = zeros(Float64, n)
-        for j in 1:l
-            for k in 1:n
-                if Cy[j, k] >= 0.0
-                    point1[k] = upper[k]
-                    point2[k] = lower[k]
-                else
-                    point1[k] = lower[k]
-                    point2[k] = upper[k]
-                end
-            end
-            result1 = sum(point1 .* Cy[j,:]) - dy[j]
-            result2 = sum(point2 .* Cy[j,:]) - dy[j]
-            if result1 >= 0.0 && result2 <= 0.0
-                return true
-            end
+function isborder(x::Hyperrectangle, y::Hyperrectangle)
+    x_lower, x_upper = low(x), high(x)
+    y_lower, y_upper = low(y), high(y)
+    for i in 1:lastindex(x_lower)
+        if x_lower[i] == y_lower[i] || x_upper[i] == y_upper[i]
+            return true
         end
-        return false
     end
+    return false
 end
 
 function forward_layer(solver::SCH, L::Layer, input::Hyperrectangle)
