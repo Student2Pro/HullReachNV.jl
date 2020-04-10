@@ -7,8 +7,11 @@
 This package is based on https://github.com/sisl/NeuralVerification.jl
 
 There are 4 methods in this package: MaxSens, HullReach, SGSV, SCH
+
 HullReach is my improvment of MaxSens using hull-preserving
+
 SGSV is improvment of MaxSens, published by the authors of MaxSens
+
 SCH is my improvment of SGSV using hull-preserving
 
 Hull-preserving is a property of certain extended set function. If an extended set function is hull-preserving, then for any simple region input set, the boundary of output set only depends on the boundary of input set.
