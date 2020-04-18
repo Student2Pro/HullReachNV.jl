@@ -5,7 +5,7 @@ using LazySets
 
 nnet = read_nnet("nnet/test_nnet.nnet")
 
-solver = SCH(0.001)
+solver = HullSearch(0.001)
 
 center = [0.5, 0.5]
 radius = [0.5, 0.5]

@@ -51,9 +51,9 @@ include("reachability.jl")
 include("maxSens.jl")
 include("hullReach.jl")
 include("SGSV.jl")
-include("SCH.jl")
+include("hullSearch.jl")
 include("pointSearch.jl")
 include("backwardReach.jl")
-export MaxSens, HullReach, SGSV, SCH, PointSearch, BackwardReach
+export MaxSens, HullReach, SGSV, HullSearch, PointSearch, BackwardReach
 
 end # module

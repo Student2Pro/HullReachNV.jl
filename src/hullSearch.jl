@@ -1,7 +1,7 @@
 """
-    SCH(tolerance::Float64)
+    HullSearch(tolerance::Float64)
 
-SCH,SGSV Combine HullReach, performs over-approximated reachability analysis to compute the over-approximated output reachable set for a network.
+HullSearch, SGSV Combine HullReach, performs over-approximated reachability analysis to compute the over-approximated output reachable set for a network.
 
 # Problem requirement
 1. Network: any depth, any activation that is monotone
@@ -17,12 +17,12 @@ Search and Reachability
 # Property
 Sound but not complete.
 """
-@with_kw struct SCH
+@with_kw struct HullSearch
     tolerance::Float64 = 1.0
 end
 
 # This is the main function
-function solve(solver::SCH, problem::Problem)
+function solve(solver::HullSearch, problem::Problem)
     result = true
     input = problem.input
     stack = Vector{Hyperrectangle}(undef, 0)
@@ -63,7 +63,7 @@ function isborder(x::Hyperrectangle, y::Hyperrectangle)
     return false
 end
 
-function forward_layer(solver::SCH, L::Layer, input::Hyperrectangle)
+function forward_layer(solver::HullSearch, L::Layer, input::Hyperrectangle)
     (W, b, act) = (L.weights, L.bias, L.activation)
     center = zeros(size(W, 1))
     gamma  = zeros(size(W, 1))
@@ -74,7 +74,7 @@ function forward_layer(solver::SCH, L::Layer, input::Hyperrectangle)
     return Hyperrectangle(center, gamma)
 end
 
-function forward_node(solver::SCH, node::Node, input::Hyperrectangle)
+function forward_node(solver::HullSearch, node::Node, input::Hyperrectangle)
     output    = node.w' * input.center + node.b
     deviation = sum(abs.(node.w) .* input.radius)
     βmax = node.act(output + deviation)

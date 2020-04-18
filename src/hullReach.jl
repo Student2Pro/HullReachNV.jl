@@ -24,20 +24,28 @@ function solve(solver::HullReach, problem::Problem)
     result = true
     delta = solver.resolution
     lower, upper = low(problem.input), high(problem.input)
-    hull_lower, hull_upper = deepcopy(lower), deepcopy(upper)
-    for i in 1:length(lower)
-        hull_lower[i] = upper[i]
-        hull_upper[i] = lower[i]
-        lower_hull = Hyperrectangle(low = lower, high = hull_upper)
-        upper_hull = Hyperrectangle(low = hull_lower, high = upper)
-        if !check_reach(solver, lower_hull, problem.network, problem.output)
-            result = false
+    n_hypers_per_dim = max.(ceil.(Int, (upper-lower) / delta), 1)
+
+    # preallocate work arrays
+    local_lower, local_upper, CI = similar(lower), similar(lower), similar(lower)
+    for i in 1:prod(n_hypers_per_dim)
+        n = i
+        hull = false
+        for j in firstindex(CI):lastindex(CI)
+            n, CI[j] = fldmod1(n, n_hypers_per_dim[j])
+            if CI[j] == 1 || CI[j] == n_hypers_per_dim[j]
+                hull = true
+            end
         end
-        if !check_reach(solver, upper_hull, problem.network, problem.output)
-            result = false
+        if hull
+            @. local_lower = lower + delta * (CI - 1)
+            @. local_upper = min(local_lower + delta, upper)
+            hyper = Hyperrectangle(low = local_lower, high = local_upper)
+            reach = forward_network(solver, problem.network, hyper)
+            if !issubset(reach, problem.output)
+                result = false
+            end
         end
-        hull_lower[i] = lower[i]
-        hull_upper[i] = upper[i]
     end
     if result
         return BasicResult(:holds)
