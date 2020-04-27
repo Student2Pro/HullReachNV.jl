@@ -23,7 +23,7 @@ function read_nnet(fname::String; last_layer_activation = Id())
         line = readline(f)
     end
     # i=1 corresponds to the input dimension, so it's ignored
-    layers = Layer[read_layer(dim, f, GeneralAct(tanh)) for dim in layer_sizes[2:end-1]] #add ReLUact/tanh
+    layers = Layer[read_layer(dim, f) for dim in layer_sizes[2:end-1]] #add ReLUact/tanh
     push!(layers, read_layer(last(layer_sizes), f, last_layer_activation))
 
     return Network(layers)

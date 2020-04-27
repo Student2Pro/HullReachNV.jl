@@ -32,6 +32,7 @@ function solve(solver::SGSV, problem::Problem)
     input = problem.input
     stack = Vector{Hyperrectangle}(undef, 0)
     push!(stack, input)
+    count = 1
     while !isempty(stack)
         interval = pop!(stack)
         reach = forward_network(solver, problem.network, interval)
@@ -42,12 +43,14 @@ function solve(solver::SGSV, problem::Problem)
                 sections = bisect(interval)
                 for i in 1:2
                     push!(stack, sections[i])
+                    count += 1
                 end
             else
                 result = false
             end
         end
     end
+    print("\n$(count)\n")
     if result
         return BasicResult(:holds)
     end

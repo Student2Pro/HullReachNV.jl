@@ -12,7 +12,7 @@ using LazySets
 
     in_hyper = Hyperrectangle(center, radius)
 
-    lower = [-3.75, -1.5]
+    lower = [-3.5, -1.5]
     upper = [-1.5, 2.0]
 
     out_hyper = Hyperrectangle(low=lower, high=upper)

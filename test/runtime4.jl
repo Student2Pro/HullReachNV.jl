@@ -2,24 +2,25 @@
 using HullReachNV
 using Test
 using LazySets
+import HullReachNV: ReLU
 
-nnet = read_nnet("nnet/test_nnet.nnet")
+nnet = read_nnet("nnet/toy_nnet.nnet", last_layer_activation = ReLU())
 
 solver = HullSearch(0.001)
 
-center = [0.5, 0.5]
-radius = [0.5, 0.5]
+center = [1.0, 1.0]
+radius = [1.0, 1.0]
 
 in_hyper = Hyperrectangle(center, radius)
 
-lower = [-3.75, -1.5]
-upper = [-1.5, 2.0]
+lower = [0.0, 0.0]
+upper = [1.2, 1.7]
 
 out_hyper = Hyperrectangle(low = lower, high = upper)
 
 problem = Problem(nnet, in_hyper, out_hyper)
 
-print("SCH - test")
+print("HullSearch - test")
 timed_result = @timed solve(solver, problem)
 print(" - Time: " * string(timed_result[2]) * " s")
 print(" - Output: ")

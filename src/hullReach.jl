@@ -9,7 +9,7 @@ HullReach performs over-approximated reachability analysis to compute the over-a
 3. Output: `AbstractPolytope`
 
 # Return
-`ReachabilityResult`
+`BasicResult`
 
 # Property
 Sound but not complete.
@@ -53,6 +53,7 @@ function solve(solver::HullReach, problem::Problem)
     return BasicResult(:violated)
 end
 
+"""
 function check_reach(solver::HullReach, input::Hyperrectangle, nnet::Network, output::Hyperrectangle)
     result = true
     delta = solver.resolution
@@ -76,6 +77,7 @@ function check_reach(solver::HullReach, input::Hyperrectangle, nnet::Network, ou
     end
     return result
 end
+"""
 
 # This function is called by forward_network
 function forward_layer(solver::HullReach, L::Layer, input::Hyperrectangle)
