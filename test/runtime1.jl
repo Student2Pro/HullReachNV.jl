@@ -6,7 +6,7 @@ import HullReachNV: ReLU
 
 nnet = read_nnet("nnet/toy_nnet.nnet", last_layer_activation = ReLU())
 
-solver = MaxSens(0.0005, true)
+solver = MaxSens(0.2, true)
 
 center = [1.0, 1.0]
 radius = [1.0, 1.0]

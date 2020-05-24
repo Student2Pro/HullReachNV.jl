@@ -6,7 +6,7 @@ import HullReachNV: ReLU
 
 nnet = read_nnet("nnet/toy_nnet.nnet", last_layer_activation = ReLU())
 
-solver = SGSV(0.001)
+solver = SpeGuid(0.001)
 
 center = [1.0, 1.0]
 radius = [1.0, 1.0]
@@ -20,7 +20,7 @@ out_hyper = Hyperrectangle(low=lower, high=upper)
 
 problem = Problem(nnet, in_hyper, out_hyper)
 
-print("SGSV - test")
+print("SpeGuid - test")
 timed_result =@timed solve(solver, problem)
 print(" - Time: " * string(timed_result[2]) * " s")
 print(" - Output: ")

@@ -47,6 +47,7 @@ function solve(solver::MaxSens, problem::Problem)
         @. local_lower = lower + delta * (CI - 1)
         @. local_upper = min(local_lower + delta, upper)
         hyper = Hyperrectangle(low = local_lower, high = local_upper)
+        #print("\n$(hyper)\n")
         reach = forward_network(solver, problem.network, hyper)
         if !issubset(reach, problem.output)
             result = false

@@ -1,7 +1,7 @@
 """
-    SGSV(tolerance::Float64)
+    SpeGuid(tolerance::Float64)
 
-SGSV, Specification-Guided Safety Verification, performs over-approximated reachability analysis to compute the over-approximated output reachable set for a network.
+SpeGuid, Specification-Guided Safety Verification, performs over-approximated reachability analysis to compute the over-approximated output reachable set for a network.
 
 # Problem requirement
 1. Network: any depth, any activation that is monotone
@@ -22,17 +22,17 @@ Sound but not complete.
 "Specification-Guided Safety Verification for Feedforward Neural Networks,"
 *ArXiv Preprint ArXiv:1812.06161*, 2018.](https://arxiv.org/abs/1812.06161)
 """
-@with_kw struct SGSV
+@with_kw struct SpeGuid
     tolerance::Float64 = 1.0
 end
 
 # This is the main function
-function solve(solver::SGSV, problem::Problem)
+function solve(solver::SpeGuid, problem::Problem)
     result = true
     input = problem.input
     stack = Vector{Hyperrectangle}(undef, 0)
     push!(stack, input)
-    count = 1
+    #count = 1
     while !isempty(stack)
         interval = pop!(stack)
         reach = forward_network(solver, problem.network, interval)
@@ -43,14 +43,14 @@ function solve(solver::SGSV, problem::Problem)
                 sections = bisect(interval)
                 for i in 1:2
                     push!(stack, sections[i])
-                    count += 1
+                    #count += 1
                 end
             else
                 result = false
             end
         end
     end
-    print("\n$(count)\n")
+    #print("\n$(count)\n")
     if result
         return BasicResult(:holds)
     end
@@ -82,7 +82,7 @@ function bisect(input::Hyperrectangle)
     return (lower_part, upper_part)
 end
 
-function forward_layer(solver::SGSV, L::Layer, input::Hyperrectangle)
+function forward_layer(solver::SpeGuid, L::Layer, input::Hyperrectangle)
     (W, b, act) = (L.weights, L.bias, L.activation)
     center = zeros(size(W, 1))
     gamma  = zeros(size(W, 1))
@@ -93,7 +93,7 @@ function forward_layer(solver::SGSV, L::Layer, input::Hyperrectangle)
     return Hyperrectangle(center, gamma)
 end
 
-function forward_node(solver::SGSV, node::Node, input::Hyperrectangle)
+function forward_node(solver::SpeGuid, node::Node, input::Hyperrectangle)
     output    = node.w' * input.center + node.b
     deviation = sum(abs.(node.w) .* input.radius)
     βmax = node.act(output + deviation)

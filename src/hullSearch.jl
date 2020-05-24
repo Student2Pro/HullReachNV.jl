@@ -27,7 +27,7 @@ function solve(solver::HullSearch, problem::Problem)
     input = problem.input
     stack = Vector{Hyperrectangle}(undef, 0)
     push!(stack, input)
-    count = 1
+    #count = 1
     while !isempty(stack)
         interval = pop!(stack)
         reach = forward_network(solver, problem.network, interval)
@@ -39,7 +39,7 @@ function solve(solver::HullSearch, problem::Problem)
                 for i in 1:2
                     if isborder(sections[i], problem.input)
                         push!(stack, sections[i])
-                        count += 1
+                        #count += 1
                     end
                 end
             else
@@ -47,7 +47,7 @@ function solve(solver::HullSearch, problem::Problem)
             end
         end
     end
-    print("\n$(count)\n")
+    #print("\n$(count)\n")
     if result
         return BasicResult(:holds)
     end
